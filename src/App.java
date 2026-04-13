@@ -52,12 +52,22 @@ public class App {
 
         for (int i = 0; i<tam.length; i++) {
             Integer[] vetor = gerarVetorObjetos(tam[i]);   
-            InsertionSort<Integer> bolha = new InsertionSort<>();
-            Integer[] vetorOrdenadoBolha = bolha.ordenar(vetor);
+            InsertionSort<Integer> insertion = new InsertionSort<>();
+            Integer[] vetorOrdenadoInsertion = insertion.ordenar(vetor);
             System.out.println("\nVetor ordenado método insertion:");
-            System.out.println("Comparações: " + bolha.getComparacoes());
-            System.out.println("Movimentações: " + bolha.getMovimentacoes());
-            System.out.println("Tempo de ordenação (ms): " + bolha.getTempoOrdenacao());
+            System.out.println("Comparações: " + insertion.getComparacoes());
+            System.out.println("Movimentações: " + insertion.getMovimentacoes());
+            System.out.println("Tempo de ordenação (ms): " + insertion.getTempoOrdenacao());
+        }
+
+        for (int i = 0; i<tam.length; i++) {
+            Integer[] vetor = gerarVetorObjetos(tam[i]);   
+            InsertionSort<Integer> Selection = new InsertionSort<>();
+            Integer[] vetorOrdenadoSelection = Selection.ordenar(vetor);
+            System.out.println("\nVetor ordenado método Selection:");
+            System.out.println("Comparações: " + Selection.getComparacoes());
+            System.out.println("Movimentações: " + Selection.getMovimentacoes());
+            System.out.println("Tempo de ordenação (ms): " + Selection.getTempoOrdenacao());
         }
         /* TO DO
         *Fazer a implementacao do restante do main para a ordenacao 
