@@ -46,39 +46,37 @@ public class App {
 
     public static void menu(Scanner teclado, int[] tam){
         System.out.println("Bem vindo ao sistema, nele você poderá testar diferentes métodos de organização para um mesmo grupo de dados aleatório");
-        int menu = -1;
-        while (menu != 0) {
-            System.out.println("Digite o numero correspondente ao metodo desesjado:");
-            System.out.println("Bubble = 1\nInsertion = 2\nSelection = 3\nMerge = 4\nSair = 0");
-            menu = teclado.nextInt();
-            switch (menu) {
-                case 1:
-                    fazBubble(tam);
-                    break;
+        // int menu = -1;
+        // while (menu != 0) {
+        //     System.out.println("Digite o numero correspondente ao metodo desesjado:");
+        //     System.out.println("Bubble = 1\nInsertion = 2\nSelection = 3\nMerge = 4\nSair = 0");
+        //     menu = teclado.nextInt();
+        //     switch (menu) {
+        //         case 1:
+        //             fazBubble(tam);
+        //             break;
 
-                case 2:
-                    fazInsertion(tam);
-                    break;
-                case 3:
-                    fazSelection(tam);
-                    break;
+        //         case 2:
+        //             fazInsertion(tam);
+        //             break;
+        //         case 3:
+        //             fazSelection(tam);
+        //             break;
                 
-                case 4:
-                    fazMerge(tam);
-                    break;
-                case 0:
-                    System.out.println("Finalizando sistema...");
+        //         case 4:
+        //             fazMerge(tam);
+        //             break;
+        //         case 0:
+        //             System.out.println("Finalizando sistema...");
             
-                default:
-                    System.err.println("Valor inválido");
-                    break;
-            }
-        }
+        //         default:
+        //             System.err.println("Valor inválido");
+        //             break;
+        //     }
+        // }
     }
-    public static void fazBubble(int[] tam){
+    public static void fazBubble(){
         for (int i = 0; i<tam.length; i++) {
-            Integer[] vetor = gerarVetorObjetos(tam[i]);   
-            BubbleSort<Integer> bolha = new BubbleSort<>();
             Integer[] vetorOrdenadoBolha = bolha.ordenar(vetor);
             System.out.println("\nVetor ordenado método Bolha:");
             System.out.println("Comparações: " + bolha.getComparacoes());
@@ -116,7 +114,7 @@ public class App {
             Integer[] vetor = gerarVetorObjetos(tam[i]);   
             MergeSort<Integer> Merge = new MergeSort<>();
             Integer[] vetorOrdenadoSelection = Merge.ordenar(vetor);
-            System.out.println("\nVetor ordenado método Selection:");
+            System.out.println("\nVetor ordenado método Merge:");
             System.out.println("Comparações: " + Merge.getComparacoes());
             System.out.println("Movimentações: " + Merge.getMovimentacoes());
             System.out.println("Tempo de ordenação (ms): " + Merge.getTempoOrdenacao());
