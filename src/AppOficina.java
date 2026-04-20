@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Scanner;
 
 /**
@@ -38,7 +39,7 @@ public class AppOficina {
     static int quantProdutos = 0;
     static String nomeArquivoDados = "produtos.txt";
     static IOrdenador<Produto> ordenador;
-
+    static Comparator<Produto> comparator;
     // #region utilidades
     static Scanner teclado;
 
@@ -79,6 +80,7 @@ public class AppOficina {
         System.out.println("3 - Ordenar produtos");
         System.out.println("4 - Embaralhar produtos");
         System.out.println("5 - Listar produtos");
+        System.out.println("6 - Cadastrar produto");
         System.out.println("0 - Finalizar");
        
         return lerNumero("Digite sua opção", Integer.class);
@@ -111,16 +113,17 @@ public class AppOficina {
             dados = new Scanner(new File(nomeArquivo));
             int tamanho = Integer.parseInt(dados.nextLine());
             
-            dadosCarregados = new Produto[tamanho];
+            dadosCarregados = new Produto[tamanho + 10];
+            int i = 0;
             while (dados.hasNextLine()) {
                 Produto novoProduto = Produto.criarDoTexto(dados.nextLine());
-                dadosCarregados[quantProdutos] = novoProduto;
-                quantProdutos++;
+                dadosCarregados[i] = novoProduto;
+                i++;
             }
             dados.close();
         }catch (FileNotFoundException fex){
-            System.out.println("Arquivo não encontrado. Produtos não carregados");
-            dadosCarregados = null;
+            System.out.println("Arquivo não encontrado. Iniciando array limpo.");
+            dadosCarregados = new Produto[10];
         }
         return dadosCarregados;
     }
@@ -129,12 +132,16 @@ public class AppOficina {
     static Produto localizarProduto() {
         cabecalho();
         System.out.println("Localizando um produto");
-        int numero = lerNumero("Digite o identificador do produto", Integer.class);
+        System.out.print("Digite o nome (descrição) do produto: ");
+        String nomeStr = teclado.nextLine();
         Produto localizado = null;
         
+        Produto dummy = new ProdutoNaoPerecivel(nomeStr, 0.01);
+        
         for (int i = 0; i < quantProdutos && localizado == null; i++) {
-            if (produtos[i].hashCode() == numero)
+            if (produtos[i] != null && produtos[i].equals(dummy)) {
                 localizado = produtos[i];
+            }
         }
         return localizado;
     }
@@ -166,25 +173,25 @@ public class AppOficina {
         cabecalho();
         
         int opcao = exibirMenuOrdenadores();
-        Produto[] dadosCarregados = carregarProdutos("produtos.txt");
+        Produto[] dadosCarregados = Arrays.copyOf(produtos, quantProdutos);
         int menu = -1;
         while (menu != 0) {
             System.out.println("Digite o numero correspondente ao metodo desesjado:");
             System.out.println("Bubble = 1\nInsertion = 2\nSelection = 3\nMerge = 4\nSair = 0");
-            menu = teclado.nextInt();
+            menu = Integer.parseInt(teclado.nextLine());
+            if(menu == 0) break;
             System.out.println("Como você deseja ordenar as informações?: ");
             System.out.println("Por código: 1\nPor texto: 2");
-            int ord = teclado.nextInt();
+            int ord = Integer.parseInt(teclado.nextLine());
             switch (ord) {
                 case 1:
-                    ordenador = new ComparadorPorCodigo();
+                    comparator = new ComparadorPorCodigo();
                     break;
-
                 case 2:
-
+                    comparator = null;
                     break;
-            
                 default:
+                    comparator = null;
                     break;
             }
             switch (menu) {
@@ -213,15 +220,18 @@ public class AppOficina {
     }
 
     static void embaralharProdutos(){
-        Collections.shuffle(Arrays.asList(produtos));
+        if(produtos != null && quantProdutos > 0){
+            java.util.Collections.shuffle(java.util.Arrays.asList(produtos).subList(0, quantProdutos));
+        }
     }
 
     static void verificarSubstituicao(Produto[] dadosOriginais, Produto[] copiaDados){
-        cabecalho();
-        System.out.print("Deseja sobrescrever os dados originais pelos ordenados (S/N)?");
+        System.out.print("Deseja sobrescrever os dados originais pelos ordenados (S/N)? ");
         String resposta = teclado.nextLine().toUpperCase();
-        if(resposta.equals("S"))
-            dadosOriginais = Arrays.copyOf(copiaDados, copiaDados.length);
+        if(resposta.equals("S")){
+            produtos = Arrays.copyOf(copiaDados, copiaDados.length + 10);
+            System.out.println("Vetor substituído no sistema.");
+        }
     }
 
     static void listarProdutos(){
@@ -230,38 +240,96 @@ public class AppOficina {
             System.out.println(produtos[i]);
         }
     }
+
+    static void cadastrarProduto() {
+        cabecalho();
+        System.out.println("Cadastro de Novo Produto");
+        int tipo = lerNumero("Tipo (1 - Não Perecível, 2 - Perecível)", Integer.class);
+        System.out.print("Descrição: ");
+        String descricao = teclado.nextLine();
+        double precoCusto = lerNumero("Preço de Custo (ex: 5.0)", Double.class);
+        double margemLucro = lerNumero("Margem de Lucro (ex: 0.2)", Double.class);
+        
+        Produto novo = null;
+        if (tipo == 1) {
+            novo = new ProdutoNaoPerecivel(descricao, precoCusto, margemLucro);
+        } else if (tipo == 2) {
+            System.out.print("Data de validade (dd/MM/yyyy): ");
+            String dataStr = teclado.nextLine();
+            java.time.LocalDate validade = java.time.LocalDate.parse(dataStr, java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            novo = new ProdutoPerecivel(descricao, precoCusto, margemLucro, validade);
+        } else {
+            System.out.println("Tipo inválido. Cancelando cadastro.");
+            return;
+        }
+        
+        if (produtos == null) {
+            produtos = new Produto[10];
+        } else if (quantProdutos >= produtos.length) {
+            produtos = java.util.Arrays.copyOf(produtos, produtos.length + 10);
+        }
+        produtos[quantProdutos] = novo;
+        quantProdutos++;
+        System.out.println("Produto cadastrado com sucesso!");
+    }
+
+    static void salvarProdutos(String nomeArquivo) {
+        try {
+            java.io.FileWriter arquivo = new java.io.FileWriter(nomeArquivo);
+            java.io.PrintWriter gravador = new java.io.PrintWriter(arquivo);
+            
+            gravador.println(quantProdutos);
+            for (int i = 0; i < quantProdutos; i++) {
+                gravador.println(produtos[i].gerarDadosTexto());
+            }
+            gravador.close();
+            arquivo.close();
+        } catch (java.io.IOException e) {
+            System.out.println("Erro ao salvar o arquivo: " + e.getMessage());
+        }
+    }
     public static void fazBubble(Produto[] dados){
             BubbleSort<Produto> bolha = new BubbleSort<>();
-            Produto[] vetorOrdenadoBolha = bolha.ordenar(dados);
+            Produto[] vetorOrdenadoBolha = comparator != null ? bolha.ordenar(dados, comparator) : bolha.ordenar(dados);
             System.out.println("\nVetor ordenado método Bolha:");
-
+            for (Produto p : vetorOrdenadoBolha) System.out.println(p);
+            verificarSubstituicao(dados, vetorOrdenadoBolha);
         }
 
     public static void fazInsertion(Produto[] dados){
             InsertionSort<Produto> insertion = new InsertionSort<>();
-            Produto[] vetorOrdenadoInsertion = insertion.ordenar(dados);
+            Produto[] vetorOrdenadoInsertion = comparator != null ? insertion.ordenar(dados, comparator) : insertion.ordenar(dados);
             System.out.println("\nVetor ordenado método insertion:");
-
+            for (Produto p : vetorOrdenadoInsertion) System.out.println(p);
+            verificarSubstituicao(dados, vetorOrdenadoInsertion);
     }
 
     public static void fazSelection(Produto[] dados){  
             SelectionSort<Produto> Selection = new SelectionSort<>();
-            Produto[] vetorOrdenadoSelection = Selection.ordenar(dados);
+            Produto[] vetorOrdenadoSelection = comparator != null ? Selection.ordenar(dados, comparator) : Selection.ordenar(dados);
             System.out.println("\nVetor ordenado método Selection:");
-
+            for (Produto p : vetorOrdenadoSelection) System.out.println(p);
+            verificarSubstituicao(dados, vetorOrdenadoSelection);
     }
 
     public static void fazMerge(Produto[] dados){  
             MergeSort<Produto> Merge = new MergeSort<>();
-            Produto[] vetorOrdenadoSelection = Merge.ordenar(dados);
+            Produto[] vetorOrdenadoMerge = comparator != null ? Merge.ordenar(dados, comparator) : Merge.ordenar(dados);
             System.out.println("\nVetor ordenado método Merge:");
-
+            for (Produto p : vetorOrdenadoMerge) System.out.println(p);
+            verificarSubstituicao(dados, vetorOrdenadoMerge);
     }
 
     public static void main(String[] args) {
         teclado = new Scanner(System.in);
         
         produtos = carregarProdutos(nomeArquivoDados);
+        quantProdutos = 0;
+        if (produtos != null) {
+            while (quantProdutos < produtos.length && produtos[quantProdutos] != null) {
+                quantProdutos++;
+            }
+        }
         embaralharProdutos();
 
         int opcao = -1;
@@ -274,10 +342,12 @@ public class AppOficina {
                 case 3 -> ordenarProdutos();
                 case 4 -> embaralharProdutos();
                 case 5 -> listarProdutos();
+                case 6 -> cadastrarProduto();
                 case 0 -> System.out.println("FLW VLW OBG VLT SMP.");
             }
-            pausa();
+            if(opcao != 0) pausa();
         }while (opcao != 0);
+        salvarProdutos(nomeArquivoDados);
         teclado.close();
     }                        
 }

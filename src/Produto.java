@@ -122,18 +122,14 @@ public abstract class Produto implements Comparable<Produto> {
     }
 
     /**
-     * Igualdade de produtos: caso possuam o mesmo código. 
+     * Igualdade de produtos: caso possuam o mesmo nome/descrição.
      * @param obj Outro produto a ser comparado 
-     * @return booleano true/false conforme o parâmetro possua o mesmo código identificador deste objeto
+     * @return booleano true/false conforme o parâmetro possua a descrição igual ou não a este produto.
      */
     @Override
     public boolean equals(Object obj){
-        try{
-            Produto outro = (Produto)obj;
-            return this.hashCode() == outro.hashCode();
-        }catch (ClassCastException ex){
-            return false;
-        }
+        Produto outro = (Produto)obj;
+        return this.descricao.toLowerCase().equals(outro.descricao.toLowerCase());
     }
     /**
      * Cria um produto a partir de uma linha de dados em formato texto. A linha de dados deve estar de acordo com a formatação
